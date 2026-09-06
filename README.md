@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="build/to-do-panel-icon.png" width="112" alt="灵动刘海图标" />
+  <img src="https://raw.githubusercontent.com/LECoO21/Dynamic-Notch/main/build/to-do-panel-icon.png" width="112" alt="灵动刘海图标" />
   <h1>灵动刘海</h1>
   <p><strong>把 Mac 刘海，变成随手可用的工作台。</strong></p>
   <p>待办、随笔记、链接、录音与本机 AI 提醒，始终贴顶待命。</p>
@@ -20,9 +20,9 @@
   </p>
 </div>
 
-![灵动刘海首页](docs/screenshots/home.png)
+![灵动刘海首页](https://raw.githubusercontent.com/LECoO21/Dynamic-Notch/main/docs/screenshots/home.png)
 
-![灵动刘海待办](docs/screenshots/todo.png)
+![灵动刘海待办](https://raw.githubusercontent.com/LECoO21/Dynamic-Notch/main/docs/screenshots/todo.png)
 
 ## 它是什么
 
