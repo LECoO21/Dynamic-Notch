@@ -1,0 +1,1151 @@
+/*
+ * Reference-inspired home + todo surfaces.
+ *
+ * This layer deliberately changes only presentation. The 12 x 4 home grid,
+ * inline grid placement written by app.js, widget sizing/dragging/visibility,
+ * and the Todo P0-P3 2 x 2 DOM remain the source of layout and behavior.
+ */
+
+#tab-home,
+#tab-todo {
+  padding: 44px 14px 14px;
+  overflow: hidden;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 3% 1%, color-mix(in srgb, var(--reference-purple) 24%, transparent), transparent 29%),
+    radial-gradient(circle at 98% 2%, color-mix(in srgb, var(--reference-pink) 16%, transparent), transparent 31%),
+    radial-gradient(circle at 4% 100%, color-mix(in srgb, var(--reference-cyan) 18%, transparent), transparent 34%),
+    linear-gradient(155deg, #ffffff 0%, var(--reference-canvas) 54%, var(--reference-topbar) 100%);
+  color: var(--reference-ink);
+}
+
+#tab-home button:focus-visible,
+#tab-home input:focus-visible,
+#tab-home textarea:focus-visible,
+#tab-todo button:focus-visible,
+#tab-todo input:focus-visible,
+#tab-todo select:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ============ Shared card language ============ */
+
+#tab-home .home-bento {
+  gap: 13px;
+}
+
+#tab-home .home-bento > [data-home-module],
+#tab-todo .sections > .quadrant {
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 22px;
+  background-clip: padding-box;
+  color: var(--reference-ink);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    inset 0 -1px 0 var(--glass-inner-line),
+    var(--glass-shadow);
+  text-shadow: none;
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  transition:
+    border-color 160ms var(--ease),
+    box-shadow 220ms var(--ease-out);
+}
+
+#tab-home .home-bento > [data-home-module]:hover,
+#tab-home .home-bento > [data-home-module]:focus-within,
+#tab-todo .sections > .quadrant:hover,
+#tab-todo .sections > .quadrant:focus-within {
+  border-color: rgba(255, 255, 255, 0.94) !important;
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    inset 0 -1px 0 var(--glass-inner-line),
+    var(--glass-shadow-hover);
+}
+
+#tab-home .home-bento > [data-home-module]::after,
+#tab-todo .sections > .quadrant::after {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.52), transparent 36%),
+    radial-gradient(340px circle at var(--tile-x, 20%) var(--tile-y, 0%), rgba(255, 255, 255, 0.46), transparent 53%);
+  opacity: 0.72;
+}
+
+#tab-home .tile-label,
+#tab-home .recorder-head .tile-label {
+  color: var(--reference-ink);
+  font-size: 12px;
+  font-weight: 720;
+  letter-spacing: -0.01em;
+}
+
+/* Reveal resize controls on card hover or keyboard focus. JS still owns hidden. */
+#tab-home .widget-size-control {
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.7);
+  color: rgba(27, 29, 32, 0.7);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 5px 14px rgba(56, 48, 72, 0.09);
+  opacity: 0;
+  pointer-events: none;
+  transform: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+#tab-home .tile:hover > .widget-size-control,
+#tab-home .widget-size-control:focus-visible {
+  background: var(--glass-surface-strong);
+  color: var(--reference-ink);
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+#tab-home .home-bento.layout-dragging > .tile:not(.is-dragging) {
+  opacity: 0.68;
+  filter: saturate(0.72);
+}
+
+#tab-home .home-bento > .tile.is-dragging {
+  border-color: rgba(27, 29, 32, 0.2) !important;
+  box-shadow:
+    0 26px 56px rgba(31, 35, 39, 0.22),
+    0 0 0 3px rgba(255, 254, 250, 0.82);
+}
+
+#tab-home .home-bento > .tile.layout-drop-target {
+  border-color: rgba(49, 137, 93, 0.54) !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(49, 137, 93, 0.22),
+    var(--glass-shadow-hover);
+}
+
+/* ============ Home palette ============ */
+
+#tab-home .home-music,
+#tab-home .home-music[data-widget-size] {
+  background:
+    linear-gradient(148deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.08) 43%, transparent 70%),
+    radial-gradient(circle at 86% 9%, rgba(255, 255, 255, 0.8), transparent 36%),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--reference-purple) 94%, transparent) 0%,
+      color-mix(in srgb, var(--reference-purple-soft) 88%, transparent) 52%,
+      color-mix(in srgb, var(--reference-purple) 84%, transparent) 100%
+    ) !important;
+}
+
+#tab-home .home-pomodoro,
+#tab-home .home-pomodoro[data-widget-size] {
+  border: 2px solid transparent !important;
+  background:
+    radial-gradient(circle at 84% 10%, rgba(255, 255, 255, 0.78), transparent 38%) padding-box,
+    linear-gradient(
+      140deg,
+      color-mix(in srgb, var(--reference-orange) 92%, transparent),
+      color-mix(in srgb, var(--reference-peach) 86%, transparent)
+    ) padding-box,
+    conic-gradient(
+      from -90deg,
+      #d98c36 0turn,
+      #eeaa55 calc(var(--pomodoro-progress, 1) * 1turn),
+      rgba(255, 255, 255, 0.58) 0turn,
+      rgba(255, 255, 255, 0.58) 1turn
+    ) border-box !important;
+}
+
+#tab-home .home-recorder,
+#tab-home .home-recorder[data-state] {
+  background:
+    linear-gradient(148deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.08) 45%, transparent 72%),
+    radial-gradient(circle at 88% 8%, rgba(255, 255, 255, 0.78), transparent 36%),
+    linear-gradient(
+      138deg,
+      color-mix(in srgb, var(--reference-cyan) 94%, transparent),
+      color-mix(in srgb, var(--reference-blue) 86%, transparent)
+    ) !important;
+}
+
+#tab-home .home-windows {
+  background:
+    linear-gradient(148deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.1) 46%, transparent 74%),
+    radial-gradient(circle at 88% 8%, rgba(255, 255, 255, 0.82), transparent 37%),
+    linear-gradient(
+      138deg,
+      color-mix(in srgb, var(--reference-blue) 90%, transparent),
+      color-mix(in srgb, var(--reference-cyan) 80%, transparent)
+    ) !important;
+}
+
+#tab-home .home-note {
+  background:
+    linear-gradient(148deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.08) 45%, transparent 72%),
+    radial-gradient(circle at 89% 8%, rgba(255, 255, 255, 0.82), transparent 38%),
+    linear-gradient(
+      138deg,
+      color-mix(in srgb, var(--reference-green) 92%, transparent),
+      color-mix(in srgb, var(--reference-green) 62%, white 38%)
+    ) !important;
+}
+
+#tab-home .home-commands {
+  background:
+    linear-gradient(148deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.08) 45%, transparent 72%),
+    radial-gradient(circle at 88% 7%, rgba(255, 255, 255, 0.8), transparent 37%),
+    linear-gradient(
+      138deg,
+      color-mix(in srgb, var(--reference-pink) 90%, transparent),
+      color-mix(in srgb, var(--reference-purple-soft) 84%, transparent)
+    ) !important;
+}
+
+/* ============ Music ============ */
+
+#tab-home .home-music .module-effect-canvas {
+  opacity: 0.11;
+  mix-blend-mode: soft-light;
+}
+
+#tab-home .home-music::after {
+  background:
+    radial-gradient(circle at 17% 84%, rgba(255, 255, 255, 0.58), transparent 39%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 42%, rgba(92, 74, 142, 0.07));
+  opacity: 1;
+}
+
+#tab-home .home-music .music-copy strong,
+#tab-home .home-music[data-widget-size] .music-copy strong {
+  color: var(--reference-ink);
+  text-shadow: none;
+}
+
+#tab-home .home-music .music-controls button,
+#tab-home .home-music[data-widget-size] .music-controls button {
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--reference-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 6px 14px rgba(82, 67, 112, 0.11);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+#tab-home .home-music .music-controls .music-play,
+#tab-home .home-music[data-widget-size] .music-controls .music-play {
+  border-color: #242128;
+  background: #242128;
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    0 8px 18px rgba(37, 31, 47, 0.2);
+}
+
+#tab-home .home-music .music-controls button:hover {
+  border-color: rgba(255, 255, 255, 0.96);
+  background: #ffffff;
+}
+
+#tab-home .home-music .music-controls .music-play:hover {
+  background: #39343f;
+}
+
+/* ============ Pomodoro ============ */
+
+#tab-home .home-pomodoro .pomodoro-status,
+#tab-home .home-pomodoro .pomodoro-caption {
+  color: rgba(27, 25, 32, 0.62);
+}
+
+#tab-home .home-pomodoro .pomodoro-dial input,
+#tab-home .home-pomodoro .pomodoro-dial span {
+  color: var(--reference-ink);
+  text-shadow: none;
+}
+
+#tab-home .home-pomodoro .pomodoro-dial input {
+  caret-color: var(--reference-ink);
+}
+
+#tab-home .home-pomodoro > .pomodoro-toggle,
+#tab-home .home-pomodoro > .pomodoro-reset {
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--reference-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 8px 19px rgba(101, 72, 40, 0.11);
+}
+
+#tab-home .home-pomodoro > .pomodoro-toggle {
+  border-color: #242128;
+  background: #242128;
+  color: #ffffff;
+}
+
+#tab-home .home-pomodoro > .pomodoro-reset {
+  border-color: rgba(201, 74, 69, 0.12);
+  background: rgba(255, 255, 255, 0.5);
+  color: #bd4541;
+}
+
+#tab-home .home-pomodoro > .pomodoro-toggle:hover,
+#tab-home .home-pomodoro > .pomodoro-reset:hover {
+  filter: brightness(1.04);
+}
+
+#tab-home .home-pomodoro .pomodoro-progress-track {
+  stroke: rgba(27, 25, 32, 0.09);
+}
+
+#tab-home .home-pomodoro .pomodoro-progress-value {
+  stroke: #d98c36;
+  filter: drop-shadow(0 0 4px rgba(217, 140, 54, 0.22));
+}
+
+/* ============ Quick recorder ============ */
+
+#tab-home .home-recorder .recorder-head time {
+  color: rgba(27, 29, 32, 0.56);
+  font-weight: 620;
+}
+
+#tab-home .home-recorder .recording-state-dot {
+  background: rgba(27, 25, 32, 0.3);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.4);
+}
+
+#tab-home .home-recorder .recording-state-dot[data-state='recording'] {
+  background: #ef5e57;
+}
+
+#tab-home .home-recorder .recording-state-dot[data-state='paused'] {
+  background: #d7962d;
+}
+
+#tab-home .home-recorder .recording-state-dot[data-state='saving'] {
+  background: #617fcb;
+}
+
+#tab-home .home-recorder .home-transcript {
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.52);
+  color: #4f5159;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+#tab-home .home-recorder .record-control {
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.64);
+  color: var(--reference-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 6px 15px rgba(46, 85, 96, 0.1);
+}
+
+#tab-home .home-recorder .record-start {
+  border-color: #242128;
+  background: #242128;
+}
+
+#tab-home .home-recorder .record-control:hover:not(:disabled) {
+  background: #ffffff;
+  color: #111214;
+}
+
+#tab-home .home-recorder .record-start:hover:not(:disabled) {
+  background: #39343f;
+}
+
+#tab-home .home-recorder .recording-strands {
+  opacity: 0.1;
+  mix-blend-mode: multiply;
+}
+
+#tab-home .home-recorder[data-state='recording'] .recording-strands {
+  opacity: 0.34;
+}
+
+#tab-home .home-recorder[data-state='paused'] .recording-strands {
+  opacity: 0.18;
+}
+
+#tab-home .home-recorder[data-state='recording'] {
+  border-color: rgba(255, 255, 255, 0.9) !important;
+  background:
+    linear-gradient(148deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.08) 45%, transparent 72%),
+    radial-gradient(circle at 88% 8%, rgba(255, 255, 255, 0.78), transparent 36%),
+    linear-gradient(
+      138deg,
+      color-mix(in srgb, var(--reference-red) 94%, transparent),
+      color-mix(in srgb, var(--reference-peach) 76%, white 24%)
+    ) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 0 0 2px rgba(218, 75, 70, 0.1),
+    0 18px 40px rgba(118, 65, 69, 0.11);
+}
+
+#tab-home .home-recorder[data-state='paused'] {
+  background:
+    linear-gradient(148deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.08) 45%, transparent 72%),
+    radial-gradient(circle at 88% 8%, rgba(255, 255, 255, 0.78), transparent 36%),
+    linear-gradient(
+      138deg,
+      color-mix(in srgb, var(--reference-orange) 94%, transparent),
+      color-mix(in srgb, var(--reference-peach) 86%, transparent)
+    ) !important;
+}
+
+#tab-home .home-recorder[data-state='saving'] {
+  background:
+    linear-gradient(148deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.08) 45%, transparent 72%),
+    radial-gradient(circle at 88% 8%, rgba(255, 255, 255, 0.78), transparent 36%),
+    linear-gradient(
+      138deg,
+      color-mix(in srgb, var(--reference-blue) 94%, transparent),
+      color-mix(in srgb, var(--reference-purple-soft) 84%, transparent)
+    ) !important;
+}
+
+/* ============ Current windows ============ */
+
+#tab-home .home-windows .windows-refresh,
+#tab-home .home-windows .windows-hidden,
+#tab-home .home-windows .window-permission-open {
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  background: rgba(255, 255, 255, 0.52);
+  color: #414047;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+#tab-home .home-windows .windows-refresh:hover,
+#tab-home .home-windows .windows-hidden:hover,
+#tab-home .home-windows .window-permission-open:hover {
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--reference-ink);
+}
+
+#tab-home .home-windows .window-item {
+  border: 1px solid transparent !important;
+  border-radius: 13px;
+  color: var(--reference-ink);
+}
+
+#tab-home .home-windows .window-item:hover {
+  border-color: rgba(255, 255, 255, 0.72) !important;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+#tab-home .home-windows .window-item.dragging {
+  border-color: rgba(95, 92, 198, 0.32) !important;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 0 0 3px rgba(103, 95, 207, 0.1),
+    0 16px 32px rgba(56, 48, 72, 0.16);
+}
+
+#tab-home .home-windows .window-item.dragging.remove-ready {
+  border-color: rgba(194, 65, 61, 0.44) !important;
+  background: rgba(255, 239, 238, 0.94);
+  opacity: 0.56;
+}
+
+#tab-home .home-windows .window-app-mark {
+  background: rgba(255, 255, 255, 0.9);
+  color: #4e5359;
+  box-shadow:
+    inset 0 0 0 1px rgba(61, 55, 72, 0.055),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 5px 12px rgba(56, 48, 72, 0.08);
+}
+
+#tab-home .home-windows .window-item > strong,
+#tab-home .home-windows .window-empty strong {
+  color: #34373b;
+}
+
+#tab-home .home-windows .window-empty {
+  color: var(--reference-ink-faint);
+}
+
+#tab-home .home-windows .window-empty.permission {
+  color: #5d5b64;
+}
+
+#tab-home .home-windows.drag-active::after {
+  border-color: rgba(194, 65, 61, 0.42);
+  background: rgba(255, 242, 241, 0.94);
+  color: #b43c37;
+  box-shadow: 0 8px 22px rgba(135, 67, 65, 0.09);
+}
+
+/* ============ Quick note ============ */
+
+#tab-home .home-note:focus-within {
+  border-color: rgba(255, 255, 255, 0.96) !important;
+  box-shadow:
+    0 0 0 3px rgba(51, 141, 94, 0.09),
+    var(--glass-shadow-hover);
+}
+
+#tab-home .home-note .note-body {
+  padding: 8px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    inset 0 0 0 1px rgba(61, 55, 72, 0.025);
+}
+
+#tab-home .home-note .note-input,
+#tab-home .home-note .note-preview,
+#tab-home .home-note .note-preview h1,
+#tab-home .home-note .note-preview h2,
+#tab-home .home-note .note-preview h3,
+#tab-home .home-note .note-preview h4,
+#tab-home .home-note .note-preview h5,
+#tab-home .home-note .note-preview h6 {
+  color: var(--reference-ink);
+}
+
+#tab-home .home-note .note-input::placeholder,
+#tab-home .home-note .note-preview-empty {
+  color: rgba(27, 25, 32, 0.58);
+}
+
+#tab-home .home-note .note-persist-actions .note-mode,
+#tab-home .home-note .note-save-btn,
+#tab-home .home-note .note-tool {
+  border-color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.54);
+  color: #55525c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+}
+
+#tab-home .home-note .note-mode:hover,
+#tab-home .home-note .note-tool:hover {
+  border-color: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--reference-ink);
+}
+
+#tab-home .home-note .note-library {
+  background: rgba(224, 255, 240, 0.96);
+  color: var(--reference-ink);
+}
+
+#tab-home .home-note .note-library > button {
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.52);
+  color: var(--reference-ink);
+}
+
+#tab-home .home-note .note-library > button:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+#tab-home .home-note .note-library time {
+  color: var(--reference-ink-faint);
+}
+
+/* ============ Commands ============ */
+
+#tab-home .home-commands .command-add {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--reference-ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+#tab-home .home-commands .command-add::placeholder {
+  color: rgba(27, 25, 32, 0.58);
+}
+
+#tab-home .home-commands .command-add:focus {
+  border-color: rgba(103, 95, 207, 0.34);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 0 0 3px rgba(103, 95, 207, 0.08);
+}
+
+#tab-home .home-commands .command-item {
+  border-color: rgba(255, 255, 255, 0.66);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.46);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+#tab-home .home-commands .command-item:hover,
+#tab-home .home-commands .command-item.copied {
+  border-color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+#tab-home .home-commands .command-item.multi-selected {
+  border-color: rgba(103, 95, 207, 0.34);
+  background: rgba(239, 236, 255, 0.88) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(103, 95, 207, 0.15),
+    0 6px 16px rgba(92, 78, 137, 0.09) !important;
+}
+
+#tab-home .home-commands .command-text,
+#tab-home .home-commands .command-edit {
+  color: #47434c;
+}
+
+#tab-home .home-commands .command-edit:focus {
+  color: var(--reference-ink);
+}
+
+#tab-home .home-commands .icon-button {
+  color: #696d73;
+}
+
+#tab-home .home-commands .icon-button:hover {
+  background: rgba(61, 55, 72, 0.065);
+  color: var(--reference-ink);
+}
+
+#tab-home .home-commands .command-empty {
+  color: var(--reference-ink-faint);
+}
+
+#tab-home .home-commands .bulk-delete {
+  border: 1px solid rgba(190, 61, 55, 0.08);
+  background: rgba(255, 255, 255, 0.46);
+  color: #a93732;
+}
+
+/* ============ Todo 2 x 2 ============ */
+
+#tab-todo .sections {
+  gap: 14px;
+}
+
+#tab-todo .quadrant {
+  padding: 15px 16px 13px;
+}
+
+#tab-todo .quadrant[data-priority='P0'] {
+  background:
+    linear-gradient(148deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.08) 46%, transparent 72%),
+    radial-gradient(circle at 93% 4%, rgba(255, 255, 255, 0.82), transparent 35%),
+    linear-gradient(
+      138deg,
+      color-mix(in srgb, var(--reference-red) 94%, transparent),
+      color-mix(in srgb, var(--reference-peach) 84%, transparent)
+    ) !important;
+}
+
+#tab-todo .quadrant[data-priority='P1'] {
+  background:
+    linear-gradient(148deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.08) 46%, transparent 72%),
+    radial-gradient(circle at 93% 4%, rgba(255, 255, 255, 0.82), transparent 35%),
+    linear-gradient(
+      138deg,
+      color-mix(in srgb, var(--reference-orange) 94%, transparent),
+      color-mix(in srgb, var(--reference-peach) 84%, transparent)
+    ) !important;
+}
+
+#tab-todo .quadrant[data-priority='P2'] {
+  background:
+    linear-gradient(148deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.08) 46%, transparent 72%),
+    radial-gradient(circle at 93% 4%, rgba(255, 255, 255, 0.82), transparent 35%),
+    linear-gradient(
+      138deg,
+      color-mix(in srgb, var(--reference-green) 94%, transparent),
+      color-mix(in srgb, var(--reference-green) 62%, white 38%)
+    ) !important;
+}
+
+#tab-todo .quadrant[data-priority='P3'] {
+  background:
+    linear-gradient(148deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.08) 46%, transparent 72%),
+    radial-gradient(circle at 93% 4%, rgba(255, 255, 255, 0.82), transparent 35%),
+    linear-gradient(
+      138deg,
+      color-mix(in srgb, var(--reference-blue) 96%, transparent),
+      color-mix(in srgb, var(--reference-cyan) 84%, transparent)
+    ) !important;
+}
+
+#tab-todo .quadrant-header {
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+#tab-todo .quadrant-header .dot {
+  width: 8px;
+  height: 8px;
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.52),
+    0 2px 5px rgba(56, 48, 72, 0.08);
+}
+
+#tab-todo .todo-category-name {
+  color: var(--reference-ink);
+  font-size: 14px;
+  font-weight: 720;
+}
+
+#tab-todo .todo-category-name:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+#tab-todo .todo-category-name:focus {
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--reference-ink);
+  box-shadow: 0 0 0 3px rgba(103, 95, 207, 0.08);
+}
+
+#tab-todo .count {
+  min-width: 25px;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.56);
+  color: #4e4a53;
+  font-weight: 650;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.84),
+    0 3px 9px rgba(56, 48, 72, 0.045);
+}
+
+#tab-todo .todo-list {
+  padding: 2px 4px 2px 1px;
+}
+
+#tab-todo .todo-list::-webkit-scrollbar-thumb {
+  background: rgba(61, 55, 72, 0.12);
+}
+
+#tab-todo .todo-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(61, 55, 72, 0.22);
+}
+
+#tab-todo .todo-list:empty::before {
+  content: '暂无待办';
+  min-height: 48px;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: rgba(27, 25, 32, 0.42);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+#tab-todo .todo-list.line-sidebar-list {
+  padding: 2px 8px 2px 1px;
+}
+
+#tab-todo .todo-item,
+#tab-todo .todo-list.line-sidebar-list .todo-item {
+  min-height: 34px;
+  margin: 3px 0;
+  padding: 4px 5px 4px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.46);
+  color: var(--reference-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 2px 6px rgba(56, 48, 72, 0.025);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+#tab-todo .todo-item:hover,
+#tab-todo .todo-list.line-sidebar-list .todo-item:hover {
+  border-color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.79);
+}
+
+#tab-todo .todo-list.line-sidebar-list .todo-item::after {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--line-accent) 10%, transparent),
+    transparent 68%
+  );
+}
+
+#tab-todo .todo-list.line-sidebar-list .todo-item::before {
+  width: 3px;
+  background: var(--line-accent);
+  opacity: 0.78;
+}
+
+#tab-todo .todo-item.multi-selected {
+  border-color: rgba(103, 95, 207, 0.34) !important;
+  background: rgba(241, 239, 255, 0.92) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(103, 95, 207, 0.17),
+    0 7px 16px rgba(92, 78, 137, 0.09) !important;
+}
+
+#tab-todo .todo-copy,
+#tab-todo .todo-text {
+  color: var(--reference-ink);
+}
+
+#tab-todo .todo-item.done .todo-text {
+  color: rgba(27, 25, 32, 0.44);
+  text-decoration-color: rgba(27, 25, 32, 0.24);
+}
+
+#tab-todo .todo-ddl {
+  color: rgba(27, 25, 32, 0.52);
+}
+
+#tab-todo .checkbox {
+  border-color: rgba(27, 25, 32, 0.35);
+  background: rgba(255, 255, 255, 0.42);
+}
+
+#tab-todo .checkbox:hover {
+  border-color: rgba(27, 25, 32, 0.68);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+#tab-todo .todo-item .delete {
+  color: rgba(27, 25, 32, 0.46);
+}
+
+#tab-todo .todo-item .delete:hover {
+  background: rgba(190, 61, 55, 0.08);
+  color: #b43c37;
+}
+
+#tab-todo .todo-battery {
+  background: rgba(61, 55, 72, 0.075);
+  box-shadow: inset 0 0 0 1px rgba(61, 55, 72, 0.045);
+}
+
+#tab-todo .todo-battery b {
+  color: rgba(27, 25, 32, 0.8);
+  font-weight: 650;
+}
+
+#tab-todo .todo-battery[data-overdue='true'] b {
+  color: #ffffff;
+}
+
+#tab-todo .add-row {
+  grid-template-columns: minmax(0, 1fr) 128px;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+#tab-todo .add-row input,
+#tab-todo .todo-deadline-trigger {
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--reference-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    inset 0 0 0 1px rgba(61, 55, 72, 0.025);
+}
+
+#tab-todo .add-row input::placeholder {
+  color: rgba(27, 25, 32, 0.56);
+}
+
+#tab-todo .add-row input:focus,
+#tab-todo .todo-deadline-trigger:hover,
+#tab-todo .todo-deadline-trigger:focus-visible {
+  border-color: rgba(103, 95, 207, 0.3);
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--reference-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 0 0 3px rgba(103, 95, 207, 0.08);
+}
+
+#tab-todo .todo-deadline-trigger.selected {
+  background: rgba(255, 255, 255, 0.76);
+  color: #403d45;
+}
+
+#tab-todo .todo-deadline-trigger.invalid,
+#tab-todo .todo-inline-deadline.invalid {
+  border-color: rgba(194, 65, 61, 0.48);
+  background: rgba(255, 239, 238, 0.9);
+  box-shadow: 0 0 0 3px rgba(194, 65, 61, 0.08);
+}
+
+#tab-todo .bulk-delete {
+  border: 1px solid rgba(180, 60, 55, 0.12);
+  background: rgba(255, 255, 255, 0.48);
+  color: #a93732;
+}
+
+#tab-todo .bulk-delete:hover {
+  background: rgba(255, 239, 238, 0.84);
+  color: #8f2925;
+}
+
+/* Inline editing keeps all controls visible at every supported card width. */
+#tab-todo .todo-inline-name,
+#tab-todo .todo-inline-deadline,
+#tab-todo .todo-inline-save {
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--reference-ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+#tab-todo .todo-inline-name {
+  border-color: rgba(103, 95, 207, 0.28);
+  box-shadow:
+    inset 0 0 0 1px rgba(103, 95, 207, 0.14),
+    0 0 0 3px rgba(103, 95, 207, 0.06);
+}
+
+#tab-todo .todo-inline-deadline {
+  color: #55525c;
+}
+
+#tab-todo .todo-inline-save {
+  border-color: #242128;
+  background: #242128;
+  color: #ffffff;
+}
+
+/* ============ Todo date popover ============ */
+
+#tab-todo .todo-date-popover {
+  filter: drop-shadow(0 18px 34px rgba(53, 43, 82, 0.16));
+}
+
+#tab-todo .todo-date-popover .todo-editor-card {
+  border: 1px solid var(--glass-border);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.64)),
+    var(--reference-purple-soft);
+  color: var(--reference-ink);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    inset 0 -1px 0 var(--glass-inner-line),
+    var(--glass-shadow-hover);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+}
+
+#tab-todo .todo-date-popover .todo-calendar-head span,
+#tab-todo .todo-date-popover .todo-time-row > span {
+  color: #555a60;
+}
+
+#tab-todo .todo-date-popover .todo-calendar-head button {
+  background: var(--glass-surface-soft);
+  color: #4c4852;
+  box-shadow: inset 0 0 0 1px var(--glass-inner-line);
+}
+
+#tab-todo .todo-date-popover .todo-calendar-head button:hover {
+  background: var(--reference-blue);
+  color: var(--reference-ink);
+}
+
+#tab-todo .todo-date-popover .todo-calendar-week {
+  color: rgba(27, 29, 32, 0.42);
+}
+
+#tab-todo .todo-date-popover .todo-calendar-grid button {
+  color: #555a60;
+}
+
+#tab-todo .todo-date-popover .todo-calendar-grid button:hover {
+  background: rgba(224, 236, 250, 0.72);
+  color: var(--reference-ink);
+}
+
+#tab-todo .todo-date-popover .todo-calendar-grid button.today {
+  box-shadow: inset 0 0 0 1px rgba(87, 82, 207, 0.38);
+}
+
+#tab-todo .todo-date-popover .todo-calendar-grid button.selected {
+  background: #242128;
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(37, 31, 47, 0.18);
+}
+
+#tab-todo .todo-date-popover .todo-time-row select {
+  border: 1px solid var(--glass-inner-line);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--reference-ink);
+  color-scheme: light;
+}
+
+#tab-todo #todo-editor-error {
+  color: #b43c37;
+}
+
+/* ============ Narrow-window refinement ============ */
+
+@media (max-width: 1050px) {
+  #tab-home,
+  #tab-todo {
+    padding: 44px 11px 11px;
+    border-radius: 21px;
+  }
+
+  #tab-home .home-bento,
+  #tab-todo .sections {
+    gap: 10px;
+  }
+
+  #tab-todo .quadrant {
+    padding: 13px 14px 11px;
+  }
+
+  #tab-todo .add-row {
+    grid-template-columns: minmax(0, 1fr) 116px;
+  }
+}
+
+@media (max-width: 900px) {
+  #tab-home,
+  #tab-todo {
+    padding: 44px 8px 8px;
+    border-radius: 18px;
+  }
+
+  #tab-home .home-bento,
+  #tab-todo .sections {
+    gap: 8px;
+  }
+
+  #tab-home .home-bento > [data-home-module],
+  #tab-todo .sections > .quadrant {
+    border-radius: 18px;
+  }
+
+  #tab-todo .quadrant {
+    padding: 10px 11px 9px;
+  }
+
+  #tab-todo .quadrant-header {
+    margin-bottom: 5px;
+  }
+
+  #tab-todo .todo-category-name {
+    font-size: 12px;
+  }
+
+  #tab-todo .todo-item,
+  #tab-todo .todo-list.line-sidebar-list .todo-item {
+    min-height: 31px;
+    margin: 2px 0;
+    border-radius: 10px;
+  }
+
+  #tab-todo .add-row {
+    grid-template-columns: minmax(0, 1fr) 104px;
+    gap: 5px;
+  }
+
+  #tab-todo .add-row input,
+  #tab-todo .todo-deadline-trigger {
+    height: 33px;
+  }
+
+  #tab-todo .todo-inline-editor {
+    gap: 4px;
+  }
+
+  #tab-todo .todo-inline-editor .todo-battery {
+    flex-basis: 54px;
+  }
+
+  #tab-todo .todo-inline-deadline {
+    flex-basis: 76px;
+  }
+}
+
+@media (max-width: 720px) {
+  #tab-home,
+  #tab-todo {
+    padding: 44px 6px 6px;
+  }
+
+  #tab-home .home-bento,
+  #tab-todo .sections {
+    gap: 6px;
+  }
+
+  #tab-todo .quadrant {
+    padding: 8px;
+  }
+
+  #tab-todo .count {
+    min-width: 21px;
+    padding-inline: 6px;
+  }
+
+  #tab-todo .add-row {
+    grid-template-columns: minmax(0, 1fr) 88px;
+  }
+
+  #tab-todo .todo-copy {
+    gap: 4px;
+  }
+
+  #tab-todo .todo-copy .todo-battery {
+    width: 50px;
+  }
+}
+
+/* The material remains readable when macOS asks for less transparency. */
+@media (prefers-reduced-transparency: reduce) {
+  #tab-home .home-bento > [data-home-module],
+  #tab-todo .sections > .quadrant,
+  #tab-todo .todo-date-popover .todo-editor-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  #tab-home .home-note .note-body,
+  #tab-home .home-commands .command-add,
+  #tab-home .home-commands .command-item,
+  #tab-todo .todo-item,
+  #tab-todo .add-row input,
+  #tab-todo .todo-deadline-trigger {
+    background-color: rgba(255, 255, 255, 0.86);
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  #tab-home .home-bento > [data-home-module],
+  #tab-todo .sections > .quadrant,
+  #tab-todo .todo-date-popover .todo-editor-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #tab-home *,
+  #tab-home *::before,
+  #tab-home *::after,
+  #tab-todo *,
+  #tab-todo *::before,
+  #tab-todo *::after {
+    animation: none !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

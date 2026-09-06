@@ -1,0 +1,908 @@
+/*
+ * Warm white Liquid Glass theme
+ *
+ * Presentation-only overrides loaded after styles.css. Window geometry,
+ * renderer state, feature visibility and persistence remain application-owned.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Palette sampled from the supplied reference. */
+  --reference-canvas: #fbf9fa;
+  --reference-topbar: #fafafc;
+  --reference-shell: #000000;
+  --reference-paper: #fbf9fa;
+  --reference-card: rgba(255, 255, 255, 0.72);
+  --reference-card-strong: rgba(255, 255, 255, 0.86);
+  --reference-muted: rgba(240, 238, 243, 0.82);
+  --reference-ink: #1b1920;
+  --reference-ink-soft: #55515c;
+  --reference-ink-faint: #716c78;
+  --reference-line: rgba(27, 25, 32, 0.08);
+  --reference-line-strong: rgba(27, 25, 32, 0.15);
+  --reference-purple: #d3caf7;
+  --reference-purple-soft: #ebe7f6;
+  --reference-red: #fbd9d8;
+  --reference-orange: #f8dabe;
+  --reference-green: #d0ffeb;
+  --reference-pink: #fad9f6;
+  --reference-blue: #e0ecfa;
+  --reference-cyan: #cff1fa;
+  --reference-peach: #fde5e1;
+
+  /* One restrained glass recipe for navigation, cards and floating layers. */
+  --glass-surface: rgba(255, 255, 255, 0.66);
+  --glass-surface-strong: rgba(255, 255, 255, 0.82);
+  --glass-surface-soft: rgba(255, 255, 255, 0.48);
+  --glass-border: rgba(255, 255, 255, 0.78);
+  --glass-inner-line: rgba(27, 25, 32, 0.07);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-shadow:
+    0 1px 1px rgba(33, 29, 43, 0.035),
+    0 12px 32px rgba(53, 43, 82, 0.09);
+  --glass-shadow-hover:
+    0 2px 3px rgba(33, 29, 43, 0.045),
+    0 18px 40px rgba(53, 43, 82, 0.13);
+  --glass-blur: 20px;
+  --glass-saturation: 125%;
+
+  /* Existing components consume these semantic tokens. */
+  --bg-base: var(--reference-shell);
+  --surface-1: var(--glass-surface);
+  --surface-2: rgba(235, 231, 246, 0.74);
+  --surface-3: rgba(224, 236, 250, 0.82);
+  --hairline: var(--reference-line);
+  --hairline-soft: rgba(27, 25, 32, 0.055);
+  --highlight-top: var(--glass-highlight);
+  --tile-highlight: rgba(255, 255, 255, 0.74);
+  --squircle-highlight: rgba(255, 255, 255, 0.9);
+  --text-1: var(--reference-ink);
+  --text-2: #3e3a45;
+  --text-3: var(--reference-ink-soft);
+  --text-4: var(--reference-ink-faint);
+  --focus-ring: #5752cf;
+  --scrollbar-thumb: rgba(62, 58, 69, 0.2);
+  --scrollbar-thumb-hover: rgba(62, 58, 69, 0.36);
+  --tooltip-bg: rgba(27, 25, 32, 0.92);
+  --item-hover: rgba(255, 255, 255, 0.58);
+  --panel-shadow: rgba(53, 43, 82, 0.15);
+  --line-marker: rgba(87, 82, 207, 0.26);
+
+  --accent-green: #27865e;
+  --accent-orange: #a8602d;
+  --accent-blue: #426ca9;
+  --p0: #c65a61;
+  --p1: #b36b35;
+  --p2: #318a65;
+  --p3: #4b75ad;
+
+  --home-clock-surface: var(--reference-card);
+  --home-note-surface: var(--reference-card);
+  --home-clip-surface: var(--reference-card);
+  --clip-text: rgba(27, 25, 32, 0.1);
+  --clip-url: var(--reference-cyan);
+  --clip-image: var(--reference-orange);
+  --clip-border-text: rgba(27, 25, 32, 0.08);
+  --clip-border-url: rgba(66, 108, 169, 0.2);
+  --clip-border-image: rgba(168, 96, 45, 0.2);
+
+  /* Four radius families keep the reference soft without blurring edges. */
+  --r-notch: 16px;
+  --r-panel: 32px;
+  --r-tile: 22px;
+  --r-squircle: 14px;
+  --r-input: 14px;
+  --r-list-item: 18px;
+  --r-popover: 24px;
+  --r-pill: 999px;
+
+  /* Expanded content starts at the physical screen top, covering the menu bar. */
+  --topbar-h: 0px;
+  --board-nav-top: 5px;
+  --board-nav-inset: 14px;
+  --hairline-w: 1px;
+  --scrollbar-w: 7px;
+
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
+    'PingFang SC', 'Helvetica Neue', sans-serif;
+  --font-mono: 'SF Mono', ui-monospace, monospace;
+  --fs-micro: 10px;
+  --fs-caption: 11px;
+  --fs-small: 12px;
+  --fs-code: 12px;
+  --fs-ui: 13px;
+  --fs-body: 14px;
+  --fs-body-lg: 14px;
+  --fs-heading-3: 17px;
+  --fs-heading-2: 21px;
+  --fs-heading-1: 30px;
+}
+
+/* Application-owned hidden state always wins over presentation rules. */
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  background: transparent !important;
+  color: var(--reference-ink);
+  font-family: var(--font);
+  font-feature-settings: 'ss01', 'cv11', 'tnum';
+}
+
+body {
+  accent-color: var(--focus-ring);
+}
+
+::selection {
+  background: var(--reference-purple);
+  color: var(--reference-ink);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Transparent Electron window, black collapsed notch, floating white board  */
+/* -------------------------------------------------------------------------- */
+
+.notch,
+#app.collapsed .notch,
+#app.closing .notch {
+  background-color: var(--reference-shell);
+  border-radius: 0 0 var(--r-notch) var(--r-notch);
+}
+
+#app.expanded .notch,
+#app.opening .notch {
+  background-color: transparent;
+}
+
+.notch-dot {
+  background: rgba(255, 255, 255, 0.68);
+}
+
+#app.collapsed .notch:hover .notch-dot {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.panel {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0 0 var(--r-panel) var(--r-panel);
+}
+
+/* The transient morph surface occupies exactly the board bounds; it is never an
+   extra outer frame. Keeping geometry on this lightweight layer avoids scaling
+   the complete card tree when the board folds back into the notch. */
+.panel::before {
+  content: '';
+  display: block;
+  inset: 0 8px 8px;
+  background: var(--reference-paper);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 0 0 28px 28px;
+  box-shadow:
+    inset 0 0 0 1px rgba(27, 25, 32, 0.035),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+}
+
+.panel::after {
+  content: none;
+  display: none;
+}
+
+.panels {
+  margin: 0 8px 8px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0 0 28px 28px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--reference-ink);
+}
+
+.tab-panel {
+  color: var(--reference-ink);
+}
+
+/* Alias support if transition state names are normalized later. */
+#app.expanding .panel {
+  pointer-events: auto;
+}
+
+#app.expanding .panel > .topbar,
+#app.expanding .panel > .panels {
+  opacity: 1;
+}
+
+#app.collapsing .panel {
+  pointer-events: none;
+}
+
+#app.collapsing .panel > .topbar,
+#app.collapsing .panel > .panels {
+  opacity: 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Original iOS-style segmented control, recolored as warm white glass         */
+/* -------------------------------------------------------------------------- */
+
+.topbar {
+  position: relative;
+  display: block;
+  height: var(--topbar-h);
+  min-height: var(--topbar-h);
+  padding: 0;
+  background: transparent;
+  color: var(--reference-ink);
+  cursor: pointer;
+}
+
+/* Navigation occupies the board's existing 44px header space above the cards. */
+.panels > .tabs,
+.panels > .tabs:not(.is-split),
+.panels > .tabs.is-split {
+  position: absolute;
+  top: var(--board-nav-top);
+  right: auto;
+  bottom: auto;
+  left: var(--board-nav-inset);
+  z-index: 5;
+  width: calc(100% - 2 * var(--board-nav-inset));
+  max-width: calc(100% - 2 * var(--board-nav-inset));
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+
+/* Each button group has its own glass base; the space between stays clear. */
+.tabs-group {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  height: 34px;
+  gap: 2px;
+  padding: 3px;
+  overflow: visible;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: var(--r-pill);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(246, 243, 249, 0.6)),
+    rgba(235, 231, 246, 0.38);
+  box-shadow:
+    inset 0 0 0 1px rgba(27, 25, 32, 0.045),
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 7px 20px rgba(53, 43, 82, 0.11);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  backdrop-filter: blur(18px) saturate(130%);
+  pointer-events: auto;
+}
+
+/* Feature count no longer changes the visual structure of the segmented control. */
+.tabs.is-split .tab {
+  background-color: transparent;
+  pointer-events: auto;
+}
+
+.tabs.is-split .tab.tab-split-start,
+.tabs .tab[data-tab='links'] {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.tabs-group-utilities {
+  margin-left: auto;
+}
+
+.tab {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  box-shadow: none;
+  color: var(--reference-ink-faint);
+  font: 590 12px/1 var(--font);
+  letter-spacing: 0;
+  white-space: nowrap;
+  transition:
+    color var(--d-fast) var(--ease),
+    background-color var(--d-fast) var(--ease),
+    transform var(--d-1) var(--ease-out);
+}
+
+.tab:hover {
+  background: rgba(255, 255, 255, 0.48);
+  color: var(--reference-ink-soft);
+}
+
+.tab:active {
+  transform: scale(0.96);
+}
+
+.tab.active,
+.tab[aria-selected='true'],
+.tab.active:hover,
+.tab[aria-selected='true']:hover {
+  background: transparent;
+  color: var(--reference-ink);
+  font-weight: 680;
+}
+
+.tab-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  stroke-width: 1.7;
+}
+
+/* All labels are visible again, matching the first segmented-control version. */
+.tab .tab-label,
+.tab:not(.active):not([aria-selected='true']) .tab-label,
+.tab.active .tab-label,
+.tab[aria-selected='true'] .tab-label {
+  position: static;
+  width: auto;
+  height: auto;
+  display: inline-block;
+  padding: 0;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  white-space: nowrap;
+}
+
+/* app.js already measures the active button and moves this capsule. */
+.tab-indicator {
+  position: absolute;
+  top: 3px;
+  bottom: auto;
+  left: 0;
+  z-index: 0;
+  width: 0;
+  height: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.94);
+  border-radius: var(--r-pill);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.98), transparent 54%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(224, 236, 250, 0.7));
+  box-shadow:
+    inset 0 0 0 1px rgba(27, 25, 32, 0.055),
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    0 4px 12px rgba(53, 43, 82, 0.13);
+  line-height: 0;
+  pointer-events: none;
+  transform: translateX(0);
+  transition:
+    transform var(--d-base) var(--ease-spring),
+    width var(--d-base) var(--ease-out),
+    box-shadow var(--d-fast) var(--ease);
+  -webkit-backdrop-filter: blur(12px) saturate(132%);
+  backdrop-filter: blur(12px) saturate(132%);
+}
+
+/* Moving between groups must not slide the capsule across the empty gap. */
+.tab-indicator.is-relocating {
+  transition: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Shared cards and hierarchy                                                  */
+/* -------------------------------------------------------------------------- */
+
+.tile:not(.home-music):not(.home-pomodoro),
+.link-group,
+.recording-library,
+.recording-detail,
+.notes-library,
+.notes-detail,
+.credentials-form-card,
+.credentials-library,
+.settings-card {
+  border: 1px solid var(--glass-inner-line);
+  background: var(--glass-surface);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+}
+
+.tile,
+.link-group,
+.recording-library,
+.recording-detail,
+.notes-library,
+.notes-detail,
+.credentials-form-card,
+.credentials-library,
+.settings-card {
+  border-radius: var(--r-tile);
+}
+
+.tile-label {
+  color: var(--reference-ink-soft);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.1px;
+}
+
+.todo-item,
+.link-item,
+.recording-item,
+.credential-item,
+.notes-list-item,
+.command-item {
+  border-color: transparent;
+  border-radius: var(--r-list-item);
+  color: var(--reference-ink);
+}
+
+.todo-item:hover,
+.link-item:hover,
+.recording-item:hover,
+.credential-item:hover,
+.notes-list-item:hover,
+.command-item:hover {
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.recording-item.active,
+.notes-list-item.active {
+  border-color: rgba(87, 82, 207, 0.13);
+  background: rgba(224, 236, 250, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(66, 108, 169, 0.1);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Buttons                                                                     */
+/* -------------------------------------------------------------------------- */
+
+button,
+input,
+textarea,
+select {
+  font-family: var(--font);
+}
+
+.workspace-button,
+.windows-refresh,
+.note-mode,
+.notes-delete,
+.clip-clear-btn,
+.settings-device-row button,
+.credential-actions button,
+.credential-edit-actions button {
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(244, 241, 247, 0.66)),
+    var(--glass-surface-soft);
+  box-shadow:
+    inset 0 0 0 1px rgba(27, 25, 32, 0.055),
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 4px 12px rgba(53, 43, 82, 0.075);
+  color: var(--reference-ink-soft);
+}
+
+.workspace-button,
+.settings-device-row button,
+.credential-edit-actions button {
+  border-radius: var(--r-pill);
+  font-weight: 650;
+}
+
+.workspace-button:hover,
+.windows-refresh:hover,
+.note-mode:hover,
+.notes-delete:hover,
+.clip-clear-btn:hover,
+.settings-device-row button:hover,
+.credential-actions button:hover,
+.credential-edit-actions button:hover {
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--reference-ink);
+  box-shadow:
+    inset 0 0 0 1px rgba(27, 25, 32, 0.07),
+    inset 0 1px 0 #ffffff,
+    0 7px 16px rgba(53, 43, 82, 0.11);
+}
+
+.workspace-button.primary,
+.credential-edit-actions button[type='submit'],
+.note-save-btn.primary {
+  border-color: rgba(27, 25, 32, 0.9);
+  background: var(--reference-ink);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 7px 17px rgba(27, 25, 32, 0.18);
+}
+
+.workspace-button.primary:hover,
+.credential-edit-actions button[type='submit']:hover,
+.note-save-btn.primary:hover {
+  background: #312e37;
+  color: #ffffff;
+}
+
+.bulk-delete {
+  border: 1px solid rgba(151, 62, 65, 0.1);
+  border-radius: var(--r-pill);
+  background: rgba(251, 217, 216, 0.8);
+  color: #8f3d42;
+}
+
+.bulk-delete:hover {
+  background: var(--reference-red);
+  color: #752e33;
+}
+
+.clip-filter {
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--reference-ink-soft);
+}
+
+.clip-filter:hover {
+  background: rgba(255, 255, 255, 0.64);
+  color: var(--reference-ink);
+}
+
+.clip-filter.active {
+  border-color: rgba(255, 255, 255, 0.88);
+  background: rgba(211, 202, 247, 0.72);
+  color: var(--reference-ink);
+  box-shadow: inset 0 0 0 1px rgba(27, 25, 32, 0.06);
+}
+
+.record-control {
+  border-color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.64);
+  color: var(--reference-ink);
+  box-shadow:
+    inset 0 0 0 1px rgba(27, 25, 32, 0.055),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.record-control.record-start {
+  background: rgba(251, 217, 216, 0.84);
+}
+
+button:disabled,
+button[aria-disabled='true'] {
+  opacity: 0.44;
+  cursor: default;
+  filter: saturate(0.45);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Inputs and search fields                                                    */
+/* -------------------------------------------------------------------------- */
+
+input,
+textarea,
+select {
+  color: var(--reference-ink);
+  caret-color: var(--reference-ink);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--reference-ink-faint);
+  opacity: 0.78;
+}
+
+.command-add,
+.link-add-wrap input,
+.add-row input,
+.notes-search-wrap,
+.credentials-form-card input,
+.credentials-library-actions input,
+.transcription-field input,
+.transcription-field select,
+.credential-item.editing input,
+.todo-inline-name,
+.todo-inline-deadline,
+.todo-time-row select {
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  border-radius: var(--r-input);
+  outline: 0;
+  background: rgba(255, 255, 255, 0.56);
+  box-shadow:
+    inset 0 0 0 1px rgba(27, 25, 32, 0.055),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  color: var(--reference-ink);
+}
+
+.link-add-wrap,
+.notes-search-wrap,
+.credentials-library-actions:has(input) {
+  border-radius: var(--r-pill);
+}
+
+.link-add-wrap input,
+.notes-search-wrap {
+  border-radius: var(--r-pill);
+}
+
+.note-body,
+.note-input,
+.note-preview,
+.notes-editor {
+  background-color: transparent;
+  color: var(--reference-ink);
+}
+
+.todo-category-name,
+.notes-detail-title,
+.command-edit {
+  background: transparent;
+  color: var(--reference-ink);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Dialogs, overlays, toasts and empty states                                  */
+/* -------------------------------------------------------------------------- */
+
+.transcription-settings-backdrop {
+  background: rgba(27, 25, 32, 0.24);
+  -webkit-backdrop-filter: blur(10px) saturate(110%);
+  backdrop-filter: blur(10px) saturate(110%);
+}
+
+.transcription-settings-card,
+.shortcut-recorder,
+.todo-editor-card {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-popover);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(235, 231, 246, 0.7), transparent 34%),
+    rgba(251, 249, 250, 0.84);
+  box-shadow:
+    inset 0 0 0 1px rgba(27, 25, 32, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 24px 72px rgba(53, 43, 82, 0.2);
+  color: var(--reference-ink);
+  -webkit-backdrop-filter: blur(28px) saturate(130%);
+  backdrop-filter: blur(28px) saturate(130%);
+}
+
+.shortcut-recorder kbd {
+  background: var(--reference-blue);
+  color: var(--reference-ink);
+}
+
+.api-settings-divider::before,
+.api-settings-divider::after,
+.settings-device-row {
+  border-color: var(--reference-line);
+}
+
+.status-toast {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(27, 25, 32, 0.88);
+  box-shadow: 0 14px 36px rgba(27, 25, 32, 0.24);
+  color: #ffffff;
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  backdrop-filter: blur(18px) saturate(120%);
+}
+
+.status-toast button {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.13);
+  color: #ffffff;
+}
+
+.window-empty,
+.command-empty,
+.clip-empty,
+.recording-detail-empty,
+.credential-empty,
+.notes-list-empty,
+.notes-detail-empty,
+.link-empty {
+  border: 1px dashed var(--reference-line-strong);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.42);
+  color: var(--reference-ink-faint);
+}
+
+.notes-detail-empty strong,
+.credential-empty strong,
+.window-empty strong {
+  color: var(--reference-ink-soft);
+}
+
+.notes-empty-mark {
+  background: var(--reference-blue);
+  color: var(--reference-ink-soft);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Focus, hover and scrolling                                                  */
+/* -------------------------------------------------------------------------- */
+
+button:focus-visible,
+[role='button'][tabindex]:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role='tab']:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(87, 82, 207, 0.14);
+}
+
+.notes-search-wrap:focus-within,
+.link-add-wrap:focus-within {
+  border-color: var(--focus-ring);
+  box-shadow: 0 0 0 4px rgba(87, 82, 207, 0.12);
+}
+
+*::-webkit-scrollbar {
+  width: var(--scrollbar-w);
+  height: var(--scrollbar-w);
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  min-height: 28px;
+  border: 2px solid transparent;
+  border-radius: var(--r-pill);
+  background: var(--scrollbar-thumb);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+
+@media (max-width: 1050px) {
+  .panels {
+    --board-nav-inset: 12px;
+  }
+
+  .panels:has(> :is(#tab-home, #tab-todo).active) {
+    --board-nav-inset: 11px;
+  }
+
+  .tabs-group {
+    gap: 1px;
+  }
+
+  .tab {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+}
+
+@media (max-width: 900px) {
+  .panels:has(> :is(#tab-home, #tab-todo).active) {
+    --board-nav-inset: 8px;
+  }
+}
+
+@media (max-width: 720px) {
+  .panels {
+    --board-nav-inset: 10px;
+  }
+
+  .panels:has(> :is(#tab-home, #tab-todo).active) {
+    --board-nav-inset: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab,
+  .tab-indicator,
+  .workspace-button,
+  .windows-refresh,
+  .note-mode,
+  .notes-delete,
+  .clip-filter,
+  .clip-clear-btn,
+  .record-control,
+  .todo-item,
+  .link-item,
+  .recording-item,
+  .credential-item,
+  .notes-list-item,
+  .command-item {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}
+
+/* macOS accessibility: transparency off keeps the same hierarchy in solids. */
+@media (prefers-reduced-transparency: reduce) {
+  .panels {
+    background: var(--reference-paper);
+  }
+
+  .tabs-group {
+    background: #f0edf4;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .tab-indicator,
+  .tile:not(.home-music):not(.home-pomodoro),
+  .link-group,
+  .recording-library,
+  .recording-detail,
+  .notes-library,
+  .notes-detail,
+  .credentials-form-card,
+  .credentials-library,
+  .settings-card,
+  .transcription-settings-card,
+  .shortcut-recorder,
+  .todo-editor-card {
+    background: #ffffff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .transcription-settings-backdrop,
+  .status-toast {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Chromium fallback: glass becomes an opaque, still-readable white surface. */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .panels {
+    background: var(--reference-paper);
+  }
+
+  .tabs-group {
+    background: #f0edf4;
+  }
+
+  .tab-indicator,
+  .tile:not(.home-music):not(.home-pomodoro),
+  .link-group,
+  .recording-library,
+  .recording-detail,
+  .notes-library,
+  .notes-detail,
+  .credentials-form-card,
+  .credentials-library,
+  .settings-card,
+  .transcription-settings-card,
+  .shortcut-recorder,
+  .todo-editor-card {
+    background: #ffffff;
+  }
+}
